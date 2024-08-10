@@ -9,31 +9,15 @@ StepperController stepperJoint1(Mode, PUL_Joint1, DIR_Joint1);
 StepperController stepperJoint2(Mode, PUL_Joint2, DIR_Joint2);
 StepperController stepperJoint3(Mode, PUL_Joint3, DIR_Joint3);
 StepperController stepperJoint4(Mode, PUL_Joint4, DIR_Joint4);
+StepperController stepperJoint5(Mode, PUL_Joint5, DIR_Joint5);
 
-double maxSpeed = 500;
+double maxSpeed = 5000;
 // double defaultSpeed = 500;
 double defaultSpeed = 5000;
-double acceleration = 3000;
+double acceleration = 1000;
 
 double limitPosition = 5000;
 
-// Variables for PID control
-double previousError1 = 0, integral1 = 0;
-double previousError2 = 0, integral2 = 0;
-double previousError3 = 0, integral3 = 0;
-double previousError4 = 0, integral4 = 0;
-
-void getInputValue()
-{
-    for (int i = 0; i < sizeof(pinIN) / sizeof(pinIN[0]); i++)
-    {
-        Serial.print(" Index");
-        Serial.print(i);
-        Serial.print(" :");
-        Serial.print(digitalRead(pinIN[i]));
-    }
-    Serial.println();
-}
 void getCurrentPosition()
 {
     Serial.print(" J1 :");
@@ -43,27 +27,32 @@ void getCurrentPosition()
     Serial.print(" J3 :");
     Serial.print(stepperJoint3.currentPosition());
     Serial.print(" J4 :");
-    Serial.println(stepperJoint4.currentPosition());
+    Serial.print(stepperJoint4.currentPosition());
+    Serial.print(" J5 :");
+    Serial.println(stepperJoint5.currentPosition());
 }
 
-void moveToTagetPosition(int targetJ1, int targetJ2, int targetJ3, int targetJ4)
+void moveToTagetPosition(int targetJ1, int targetJ2, int targetJ3, int targetJ4, int targetJ5)
 {
     while (
         stepperJoint1.currentPosition() != targetJ1 ||
         stepperJoint2.currentPosition() != targetJ2 ||
         stepperJoint3.currentPosition() != targetJ3 ||
-        stepperJoint4.currentPosition() != targetJ4)
+        stepperJoint4.currentPosition() != targetJ4 ||
+        stepperJoint5.currentPosition() != targetJ5)
     {
         delay(1);
         stepperJoint1.setSpeedWithPositionCondition(targetJ1);
         stepperJoint2.setSpeedWithPositionCondition(targetJ2);
         stepperJoint3.setSpeedWithPositionCondition(targetJ3);
         stepperJoint4.setSpeedWithPositionCondition(targetJ4);
+        stepperJoint5.setSpeedWithPositionCondition(targetJ5);
 
         stepperJoint1.runSpeed();
         stepperJoint2.runSpeed();
         stepperJoint3.runSpeed();
         stepperJoint4.runSpeed();
+        stepperJoint5.runSpeed();
     }
 }
 
@@ -72,17 +61,15 @@ void setup()
     Serial.begin(115200);
 
     Serial.println("Robot !!!");
-    for (int i = 0; i < sizeof(pinIN) / sizeof(pinIN[0]); i++)
-        pinMode(pinIN[i], INPUT_PULLUP);
-    stepperJoint1.setMaxSpeed(5000);
-    stepperJoint2.setMaxSpeed(5000);
-    stepperJoint3.setMaxSpeed(5000);
-    stepperJoint4.setMaxSpeed(5000);
+    stepperJoint1.setMaxSpeed(maxSpeed);
+    stepperJoint2.setMaxSpeed(maxSpeed);
+    stepperJoint3.setMaxSpeed(maxSpeed);
+    stepperJoint4.setMaxSpeed(maxSpeed);
 
-    stepperJoint1.setAcceleration(1000);
-    stepperJoint2.setAcceleration(1000);
-    stepperJoint3.setAcceleration(1000);
-    stepperJoint4.setAcceleration(1000);
+    stepperJoint1.setAcceleration(acceleration);
+    stepperJoint2.setAcceleration(acceleration);
+    stepperJoint3.setAcceleration(acceleration);
+    stepperJoint4.setAcceleration(acceleration);
 }
 
 void loop()
@@ -91,12 +78,18 @@ void loop()
     // 0_3000_5000_6200_
     // 0_3500_14000_6200_
     // 0_3000_5000_6200_
+    /*
+0_0_0_0_0_
+0_0_-1500_3100_3100_
+0_0_-3500_14000_5600_
+0_0_-1500_7000_5600_
+0_0_-3500_7500_0_
+    */
     // getInputValue();
     getCurrentPosition();
     delay(1);
     if (Serial.available() > 0)
     {
-
         String type = Serial.readStringUntil('\n');
         if (type == "moveToTagetPosition")
         {
@@ -110,8 +103,11 @@ void loop()
                     int targetJ2 = Serial.readStringUntil('_').toInt();
                     int targetJ3 = Serial.readStringUntil('_').toInt();
                     int targetJ4 = Serial.readStringUntil('_').toInt();
-                    moveToTagetPosition(targetJ1, targetJ2, targetJ3, targetJ4);
-                    // moveToPosition(targetJ1, targetJ2, targetJ3, targetJ4);
+                    int targetJ5 = Serial.readStringUntil('_').toInt();
+                    // Serial.println(" >> targetJ5: " + String(targetJ5));
+                    moveToTagetPosition(targetJ1, targetJ2, targetJ3, targetJ4, targetJ5);
+                    // * for test
+                    // moveToTagetPosition(targetJ2, targetJ3, targetJ1, targetJ4, targetJ5);
                     break;
                 }
             }
@@ -119,22 +115,22 @@ void loop()
         else if (type == "test")
         {
             // moveToTagetPosition(0, 0, 0, 0);
-            moveToTagetPosition(0, 1500, 3100, 3100);
-            moveToTagetPosition(0, 3500, 14000, 5600);
+            moveToTagetPosition(0, 0, -1500, 3100, 3100);
+            moveToTagetPosition(0, 0, -3500, 14000, 5600);
             delay(1000);
-            moveToTagetPosition(0, 1500, 7000, 5600);
-            moveToTagetPosition(0, 3500, 7500, 0);
+            moveToTagetPosition(0, 0, -1500, 7000, 5600);
+            moveToTagetPosition(0, 0, -3500, 7500, 0);
             // moveToTagetPosition(0, 7100, 11100, -3600);
-            moveToTagetPosition(0, 5500, 9500, -2000);
+            moveToTagetPosition(0, 0, -5500, 9500, -2000);
             delay(1000);
-            moveToTagetPosition(0, 6300, 11100, 500);
+            moveToTagetPosition(0, 0, -6300, 11100, 500);
             // delay(500);
             delay(2000);
-            moveToTagetPosition(0, 0, 0, 0);
+            moveToTagetPosition(0, 0, 0, 0, 0);
         }
         else if (type == "home")
         {
-            moveToTagetPosition(0, 0, 0, 0);
+            moveToTagetPosition(0, 0, 0, 0, 0);
         }
         else
         {
@@ -142,38 +138,9 @@ void loop()
         }
     }
 
-    // TODO : This is for test with out limmit
-
-    // if (!digitalRead(SwitchJoint1UP))
-    //     stepperJoint1.setSpeed(-defaultSpeed);
-    // else if (!digitalRead(SwitchJoint1DOWN))
-    //     stepperJoint1.setSpeed(defaultSpeed);
-    // else
-    //     stepperJoint1.setSpeed(0);
-
-    // if (!digitalRead(SwitchJoint2UP))
-    //     stepperJoint2.setSpeed(defaultSpeed);
-    // else if (!digitalRead(SwitchJoint2DOWN))
-    //     stepperJoint2.setSpeed(-defaultSpeed);
-    // else
-    //     stepperJoint2.setSpeed(0);
-
-    // if (!digitalRead(SwitchJoint3UP))
-    //     stepperJoint3.setSpeed(-defaultSpeed);
-    // else if (!digitalRead(SwitchJoint3DOWN))
-    //     stepperJoint3.setSpeed(defaultSpeed);
-    // else
-    //     stepperJoint3.setSpeed(0);
-
-    // if (!digitalRead(SwitchJoint4UP))
-    //     stepperJoint4.setSpeed(-defaultSpeed);
-    // else if (!digitalRead(SwitchJoint4DOWN))
-    //     stepperJoint4.setSpeed(defaultSpeed);
-    // else
-    //     stepperJoint4.setSpeed(0);
-
-    stepperJoint1.runSpeed();
-    stepperJoint2.runSpeed();
-    stepperJoint3.runSpeed();
-    stepperJoint4.runSpeed();
+    // stepperJoint1.runSpeed();
+    // stepperJoint2.runSpeed();
+    // stepperJoint3.runSpeed();
+    // stepperJoint4.runSpeed();
+    // stepperJoint5.runSpeed();
 }
