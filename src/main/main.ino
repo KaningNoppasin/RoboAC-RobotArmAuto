@@ -1,5 +1,4 @@
 #include <AccelStepper.h>
-#include <MultiStepper.h>
 #include "./init_IO.h"
 #include "StepperController.h"
 
@@ -12,7 +11,6 @@ StepperController stepperJoint4(Mode, PUL_Joint4, DIR_Joint4);
 StepperController stepperJoint5(Mode, PUL_Joint5, DIR_Joint5);
 
 double maxSpeed = 5000;
-// double defaultSpeed = 500;
 double defaultSpeed = 5000;
 double acceleration = 1000;
 
@@ -32,7 +30,7 @@ void getCurrentPosition()
     Serial.println(stepperJoint5.currentPosition());
 }
 
-void moveToTagetPosition(int targetJ1, int targetJ2, int targetJ3, int targetJ4, int targetJ5)
+void moveToTargetPosition(int targetJ1, int targetJ2, int targetJ3, int targetJ4, int targetJ5)
 {
     while (
         stepperJoint1.currentPosition() != targetJ1 ||
@@ -60,7 +58,6 @@ void setup()
 {
     Serial.begin(115200);
 
-    Serial.println("Robot !!!");
     stepperJoint1.setMaxSpeed(maxSpeed);
     stepperJoint2.setMaxSpeed(maxSpeed);
     stepperJoint3.setMaxSpeed(maxSpeed);
@@ -74,16 +71,8 @@ void setup()
 
 void loop()
 {
-    // 0_0_0_6200_
-    // 0_3000_5000_6200_
-    // 0_3500_14000_6200_
-    // 0_3000_5000_6200_
     /*
-0_0_0_0_0_
-0_0_-1500_3100_3100_
-0_0_-3500_14000_5600_
-0_0_-1500_7000_5600_
-0_0_-3500_7500_0_
+    0_0_0_0_0_
     */
     // getInputValue();
     getCurrentPosition();
@@ -91,46 +80,42 @@ void loop()
     if (Serial.available() > 0)
     {
         String type = Serial.readStringUntil('\n');
-        if (type == "moveToTagetPosition")
+        if (type == "moveToTargetPosition")
         {
-            Serial.println(" >> moveToTagetPosition");
+            Serial.println(" >> moveToTargetPosition");
             Serial.read();
             while (true)
             {
                 if (Serial.available() > 0)
                 {
+                    // 0_0_0_0_0_
                     int targetJ1 = Serial.readStringUntil('_').toInt();
                     int targetJ2 = Serial.readStringUntil('_').toInt();
                     int targetJ3 = Serial.readStringUntil('_').toInt();
                     int targetJ4 = Serial.readStringUntil('_').toInt();
                     int targetJ5 = Serial.readStringUntil('_').toInt();
-                    // Serial.println(" >> targetJ5: " + String(targetJ5));
-                    moveToTagetPosition(targetJ1, targetJ2, targetJ3, targetJ4, targetJ5);
-                    // * for test
-                    // moveToTagetPosition(targetJ2, targetJ3, targetJ1, targetJ4, targetJ5);
+                    moveToTargetPosition(targetJ1, targetJ2, targetJ3, targetJ4, targetJ5);
                     break;
                 }
             }
         }
         else if (type == "test")
         {
-            // moveToTagetPosition(0, 0, 0, 0);
-            moveToTagetPosition(0, 0, -1500, 3100, 3100);
-            moveToTagetPosition(0, 0, -3500, 14000, 5600);
+            // moveToTargetPosition(0, 0, 0, 0);
+            moveToTargetPosition(0, 0, -1500, 3100, 3100);
+            moveToTargetPosition(0, 0, -3500, 14000, 5600);
             delay(1000);
-            moveToTagetPosition(0, 0, -1500, 7000, 5600);
-            moveToTagetPosition(0, 0, -3500, 7500, 0);
-            // moveToTagetPosition(0, 7100, 11100, -3600);
-            moveToTagetPosition(0, 0, -5500, 9500, -2000);
+            moveToTargetPosition(0, 0, -1500, 7000, 5600);
+            moveToTargetPosition(0, 0, -3500, 7500, 0);
+            moveToTargetPosition(0, 0, -5500, 9500, -2000);
             delay(1000);
-            moveToTagetPosition(0, 0, -6300, 11100, 500);
-            // delay(500);
+            moveToTargetPosition(0, 0, -6300, 11100, 500);
             delay(2000);
-            moveToTagetPosition(0, 0, 0, 0, 0);
+            moveToTargetPosition(0, 0, 0, 0, 0);
         }
         else if (type == "home")
         {
-            moveToTagetPosition(0, 0, 0, 0, 0);
+            moveToTargetPosition(0, 0, 0, 0, 0);
         }
         else
         {
@@ -138,9 +123,4 @@ void loop()
         }
     }
 
-    // stepperJoint1.runSpeed();
-    // stepperJoint2.runSpeed();
-    // stepperJoint3.runSpeed();
-    // stepperJoint4.runSpeed();
-    // stepperJoint5.runSpeed();
 }

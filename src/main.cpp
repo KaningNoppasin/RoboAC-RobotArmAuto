@@ -1,2 +1,2 @@
 #include <Arduino.h>
-#include "./main/compleatCode.ino"
+#include "./main/main.ino"

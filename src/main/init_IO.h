@@ -49,20 +49,6 @@
 
 */
 
-// #define DIR_Joint1 46
-// #define PUL_Joint1 47
-
-// #define DIR_Joint2 48
-// #define PUL_Joint2 49
-
-// #define DIR_Joint3 50
-// #define PUL_Joint3 51
-
-// #define DIR_Joint4 52
-// #define PUL_Joint4 53
-
-// #define DIR_Joint5 44
-// #define PUL_Joint5 45
 
 #define DIR_Joint1 44
 #define PUL_Joint1 45
